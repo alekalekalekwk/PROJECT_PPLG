@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Laporan macet secara real-time oleh warga sekitar">
+  <title>Trafficer - Laporan Lalu Lintas</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚦</text></svg>">
+</head>
+<body>
+
+  <!-- header -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">🚦</div>
+        <h1>Trafficer</h1>
+      </div>
+      <div class="header-meta">
+        <div class="live-badge">
+          <span class="live-dot"></span>
+          Live
+        </div>
+        <time class="clock" id="liveClock">--</time>
+        <button id="themeToggle" onclick="darkMode()" class="btn-theme" title="Toggle Light/Dark Mode">☀️</button>
+        <button id="colorPickerBtn" class="btn-theme" title="Pilih Warna Tema" onclick="toggleColorPicker()">🎨</button>
+        <button onclick="window.location.reload()" class="btn-submit">Refresh</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- main bar -->
+  <main class="main-container">
+
+    <!-- stats bar -->
+    <section class="stats-bar" aria-label="Summary statistics">
+      <div class="stat-card">
+        <div class="stat-label">Total Laporan</div>
+        <div class="stat-value" id="statTotal">0</div>
+        <div class="stat-sub">Dibuat oleh warga</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Rata-rata Suhu</div>
+        <div class="stat-value" id="statTemp">--</div>
+        <div class="stat-sub">Semua laporan</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Rata-rata Kemacetan</div>
+        <div class="stat-value" id="statTraffic">--</div>
+        <div class="stat-sub">Skala 1–10</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Terbanyak</div>
+        <div class="stat-value" id="statStatus">--</div>
+        <div class="stat-sub">Paling sering dilaporkan</div>
+      </div>
+    </section>
+    <div class="content-grid">
+
+      <!-- form kirim -->
+      <aside class="form-panel">
+        <h2 class="panel-title">
+          <span class="icon">📝</span>
+          Kirim Laporan
+        </h2>
+        <form id="reportForm" autocomplete="off">
+          <div class="form-group">
+            <label for="inputLocation">Lokasi</label>
+            <input type="text" id="inputLocation" placeholder="contoh: Jl. Sudirman, Jakarta" required>
+          </div>
+          <div class="form-group">
+            <label for="inputTemp">Suhu (°C)</label>
+            <input type="number" id="inputTemp" placeholder="contoh: 32C" min="-50" max="60" required>
+          </div>
+          <div class="form-group">
+            <label for="inputScale">Skala Kemacetan</label>
+            <div class="range-wrapper">
+              <div class="range-value" id="scaleDisplay">5</div>
+              <input type="range" id="inputScale" min="1" max="10" value="5">
+              <div class="range-labels">
+                <span>1 — Lancar</span>
+                <span>10 — Macet Parah</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="inputStatus">Status Jalan</label>
+            <select id="inputStatus">
+              <option value="Lancar">✅ Lancar</option>
+              <option value="Agak Macet">🟡 Agak Macet</option>
+              <option value="Macet">🟠 Macet</option>
+              <option value="Kecelakaan">🔴 Kecelakaan</option>
+              <option value="Jalan Ditutup">⛔ Jalan Ditutup</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="inputNotes">Catatan (opsional)</label>
+            <textarea id="inputNotes" placeholder="Ada info tambahan?"></textarea>
+          </div>
+          <button type="submit" class="btn-submit" id="btnSubmit">
+            Publish Laporan
+          </button>
+        </form>
+      </aside>
+
+      <!-- feed report -->
+      <section class="feed-section">
+        <div class="feed-header">
+          <div class="feed-title">
+            Laporan Real Time Oleh Warga Sekitar
+            <span class="report-count" id="reportCount">0 reports</span>
+          </div>
+          <div class="filter-bar">
+            <input type="text" id="searchInput" placeholder="🔍 Cari Lokasi">
+            <button class="filter-btn active" data-status="All" type="button">All</button>
+            <button class="filter-btn" data-status="Lancar" type="button">Lancar</button>
+            <button class="filter-btn" data-status="Agak Macet" type="button">Agak Macet</button>
+            <button class="filter-btn" data-status="Macet" type="button">Macet</button>
+            <button class="filter-btn" data-status="Kecelakaan" type="button">Kecelakaan</button>
+            <button class="filter-btn" data-status="Jalan Ditutup" type="button">Jalan Ditutup</button>
+          </div>
+        </div>
+        <div class="reports-feed" id="reportsFeed">
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- color picker panel -->
+  <div id="colorPickerPanel" class="color-picker-panel" style="display:none">
+    <div class="cp-header">
+      <span class="cp-title"> Pilih Warna Tema</span>
+      <button class="cp-close" onclick="toggleColorPicker()">✕</button>
+    </div>
+    <div class="cp-spectrum">
+      <canvas id="spectrumCanvas" width="260" height="28"></canvas>
+    </div>
+    <div class="cp-hue-row">
+      <label class="cp-label">Hue</label>
+      <input type="range" id="hueSlider" min="0" max="360" value="220" class="cp-hue-slider">
+      <span id="hueValue" class="cp-hue-val">220°</span>
+    </div>
+    <div class="cp-sat-row">
+      <label class="cp-label">Saturasi</label>
+      <input type="range" id="satSlider" min="30" max="100" value="70" class="cp-sat-slider">
+    </div>
+    <div class="cp-light-row">
+      <label class="cp-label">Kecerahan</label>
+      <input type="range" id="lightSlider" min="30" max="75" value="58" class="cp-light-slider">
+    </div>
+    <div class="cp-preview-row">
+      <div id="colorPreview" class="cp-preview"></div>
+      <div class="cp-presets">
+        <button class="cp-preset" data-hue="220" data-sat="70" data-light="58" style="background:hsl(220,70%,58%)" title="Blue"></button>
+        <button class="cp-preset" data-hue="270" data-sat="65" data-light="58" style="background:hsl(270,65%,58%)" title="Purple"></button>
+        <button class="cp-preset" data-hue="340" data-sat="70" data-light="55" style="background:hsl(340,70%,55%)" title="Pink"></button>
+        <button class="cp-preset" data-hue="160" data-sat="65" data-light="45" style="background:hsl(160,65%,45%)" title="Teal"></button>
+        <button class="cp-preset" data-hue="30" data-sat="80" data-light="52" style="background:hsl(30,80%,52%)" title="Orange"></button>
+        <button class="cp-preset" data-hue="0" data-sat="70" data-light="55" style="background:hsl(0,70%,55%)" title="Red"></button>
+      </div>
+    </div>
+    <button class="cp-apply" onclick="applyThemeColor()">✓ Terapkan Warna</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
