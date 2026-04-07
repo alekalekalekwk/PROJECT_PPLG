@@ -1,4 +1,15 @@
+    
+    
+    // popup instruksi
+    window.onload = function() {
+        document.getElementById("overlay").classList.add("active");
+        document.getElementById("popup").classList.add("active");
+    }
 
+    function closePopup() {
+        document.getElementById("overlay").classList.remove("active");
+        document.getElementById("popup").classList.remove("active");
+    }
 
 // simpan dan ambil data dari localStorage
 function getReports() {
@@ -15,8 +26,8 @@ function saveReports(reports) {
 
 // ID generator 
 function generateId() {
-  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  var result = 'RPT-';
+  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  var result = 'ID-';
   for (var i = 0; i < 8; i++) {
     result += chars[Math.floor(Math.random() * chars.length)];
   }
@@ -110,19 +121,19 @@ function getTrafficColor(scale) {
   return "#dc2626";
 }
 
-// ===== WAKTU LALU =====
+// TANGGALLLLLL SUUU
 function timeAgo(timestamp) {
-  var diff = Date.now() - new Date(timestamp).getTime();
-  var minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return "Baru saja";
-  if (minutes < 60) return minutes + "m ago";
-  var hours = Math.floor(minutes / 60);
-  if (hours < 24) return hours + "h ago";
-  var days = Math.floor(hours / 24);
-  return days + "d ago";
-}
+  const past = new Date(timestamp);
 
-// ===== STATUS HELPER =====
+  const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"];
+
+  const day = past.getDate();
+  const month = months[past.getMonth()];
+  const year = past.getFullYear();
+
+  return day + " " + month + " " + year;
+}
+// ststus
 function getStatusClass(status) {
   return status.toLowerCase().replace(/ /g, "-");
 }
